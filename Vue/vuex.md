@@ -57,11 +57,60 @@ export default {
   // props: ['passedCounter']
 }
 ```
-* 기타 알아둘 개념
-  * Getters, Mutations, Actions
+
+`Getters, Mutations`
+* => 컴포넌트 내에서 store를 다루는 코드들을 감싸서 추상화시켜서 접근할 수 있게 해주는 도구들?
+* => 가독성을 높여주는 동시에, 의존성을 낮춰주니 좋다!
+
+Getters
+* `this.$store.getters.${getterName}`
+* store의 원본 데이터를 가지고 반복되는 일을 거쳐 가공된 데이터로 얻어와야 할 때, store내에서 getter메서드로 추상화하여 호출가능 (네임스페이스가 길거나, 새 데이터를 다시 계산할 때(곱하기, 필터, 맵...) 등등)
+* 각 컴포넌트에서 직접 store를 가공한 코드를 반복적으로 쓰지 않아도 됨
+
+```javascript
+// store.js
+export const store = new Vuex.Store({
+  // ...
+  getters: {
+    getCounter: function (state) {
+      return state.counter;
+    },
+    getDoneTodos: function (state) {
+      return this.store.state.todos.filter(todo => todo.done)...
+    }
+  }
+});
+
+// App.vue
+computed: {
+  parentCounter() {
+    this.$store.getters.getCounter;
+  }
+},
+```
+
+ * mapGetters
+  * getters를 호출하는 코드부분을 좀 더 직관적으로 읽히게 도와주는 듯 (맵형식으로 호출), 특히 여러 개의 gettter를 가져다 써야할 때 좋겠다.
+```javascript
+computed: {
+  parentCounter() {
+    this.$store.getters.getCounter;
+  }
+},
+
+computed: {
+ ...mapGetters({
+   parentCounter : 'getCounter', // getCounter 는 Vuex 의 getters 에 선언된 속성 이름
+   'getCounter', // 이렇게도 사용가능
+ }),
+}
+```
+
+Mutations
 
 
 ## 유용/참고 링크
 * https://joshua1988.github.io/web-development/vuejs/vuex-start/
 * https://joshua1988.github.io/web-development/vuejs/vuex-getters-mutations/
 * https://joshua1988.github.io/web-development/vuejs/vuex-actions-modules/
+
