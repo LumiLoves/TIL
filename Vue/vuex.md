@@ -58,12 +58,16 @@ export default {
 }
 ```
 
-`Getters, Mutations`
+## Getters, Mutations
 * => 컴포넌트 내에서 store를 다루는 코드들을 감싸서 추상화시켜서 접근할 수 있게 해주는 도구들?
+  * `공부할 포인트: 컴포넌트 내에서 this.$store 로 접근하는 것은 안티 패턴 / vue의 reactivity체계, 상태관리 패턴 에 맞지않음 / 여러개의 컴포넌트에서 같은 state 값을 동시에 제어하면, 어느 컴포넌트에서 호출해서 변경된 건지 추적이 어려움 / 상태변화를 명시적으로 수행함으로써 테스팅, 디버깅, vue의 reactive 성질 준수 혜택을 얻는다.`
 * => 가독성을 높여주는 동시에, 의존성을 낮춰주니 좋다!
 
-Getters
-* `this.$store.getters.${getterName}`
+### Getters
+* 코드
+  * computed에 등록하여 사용
+  * `this.$store.getters.${getterName}`
+  * `...mapGetters([ 'getCounter' ])`
 * store의 원본 데이터를 가지고 반복되는 일을 거쳐 가공된 데이터로 얻어와야 할 때, store내에서 getter메서드로 추상화하여 호출가능 (네임스페이스가 길거나, 새 데이터를 다시 계산할 때(곱하기, 필터, 맵...) 등등)
 * 각 컴포넌트에서 직접 store를 가공한 코드를 반복적으로 쓰지 않아도 됨
 
@@ -89,7 +93,7 @@ computed: {
 },
 ```
 
- * mapGetters
+#### mapGetters
   * getters를 호출하는 코드부분을 좀 더 직관적으로 읽히게 도와주는 듯 (맵형식으로 호출), 특히 여러 개의 gettter를 가져다 써야할 때 좋겠다.
 ```javascript
 computed: {
@@ -106,10 +110,57 @@ computed: {
 }
 ```
 
-Mutations
+### Mutations
+* 코드
+  * method에 등록하여 사용 ==> `왜 다를까? getter랑`
+  * `this.$store.commit('addCounter')` // getter와 다르게 commit을 사용하여 호출해야 함. `추적가능한 상태변화를 위해 프레임워크가 구조화 된 부분이라는데? 알아보기. setter는 getter와 다르게 store의 state값을 변화시켜줘야하니까, 아마도 등록과정을 거쳐서 여러군데서 호출되면 어느 컴포넌트에서 어떤 파라미터로 어떻게 고쳐서 보낼지를 정리하느 과정이 필요해서 그럴거 같음.`
+  * `...mapMutations([ 'addCounter' ]) // 
+* (getter와 비슷하게) store 데이터 조작을 메서드로 정의하여 호출가능한 **Setter**
+* `actions와의 차이점: mutations는 동기적 로직 정의 / actions는 비동기적 로직 정의 ===> 이 부분은 더 알아봐야 할듯`
+* `commit`을 이용하여 state 변경
+  * component에서 commit -> mutations에서 chage -> vuex의 state 변경
+
+```javascript
+// store.js
+export const store = new Vuex.Store({
+  // ...
+  mutations: {
+    addCounter: function (state, payload) {
+      return state.counter++;
+    },
+    /*
+    // payload가 { value: 10 } 일 경우
+    addCounter: function (state, payload) {
+      state.counter = payload.value
+    }
+    */
+  }
+});
+
+<!-- App.vue -->
+<div id="app">
+  Parent counter : {{ parentCounter }} <br>
+  <button @click="addCounter">+</button>
+  <!-- ... -->
+</div>
+
+// App.vue
+methods: {
+  addCounter() {
+    // this.$store.state.counter++;
+    this.$store.commit('addCounter');
+    this.$store.commit('addCounter', 10);
+    this.$store.commit('addCounter', {
+      value: 10,
+      arr: ['a', 'b', 'c']
+    });
+  }
+},
+
+```
 
 
-## 유용/참고 링크
+## 참고 자료
 * https://joshua1988.github.io/web-development/vuejs/vuex-start/
 * https://joshua1988.github.io/web-development/vuejs/vuex-getters-mutations/
 * https://joshua1988.github.io/web-development/vuejs/vuex-actions-modules/
