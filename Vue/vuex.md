@@ -159,6 +159,36 @@ methods: {
 
 ```
 
+### Actions
+* Mutations는 순차적 로직을, Actions에는 비순차적 로직 또는 비동기 처리 로직을 선언
+* 왜? 이렇게 나눌까? `==> 설명을 봤는데 필요성은 알겠으나 완전히 이해가 안가네..두 개가 어떻게 내부적을 돌아가는지를 좀 더 봐야할듯.?! 아니 알 것 같기도... action에서 비동기 처리후 mutation을 호출하여 해당시점에 동기처리. 이렇게~`
+* 어쨌든 actions가 비동기적인 로직을 처리 후, mutation으로 store를 set할 수 밖에 없다능.. context로 접근해서 commit한다.
+```javascript
+// store.js
+export const store = new Vuex.Store({
+  // ...
+  mutations: {
+    addCounter: function (state, payload) {
+      return state.counter++;
+    }
+  },
+  actions: { // Actions 등록
+    addCounter: function (context) {
+      return context.commit('addCounter'); // commit은 mutation메서드 호출방법임
+    },
+    getServerData: function (context) {
+      return axios.get("sample.json").then(function() {
+        // ...
+      });
+    },
+    delayFewMinutes: function (context) {
+      return setTimeout(function () {
+        context.commit('addCounter');
+      }, 1000);
+    }
+  }
+});
+```
 
 ## 참고 자료
 * https://joshua1988.github.io/web-development/vuejs/vuex-start/
