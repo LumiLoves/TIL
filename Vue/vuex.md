@@ -160,10 +160,30 @@ methods: {
 ```
 
 ### Actions
+* `this.$store.dispatch('addCounter')`
+* `...mapActions([ 'asyncIncrement', ...])`
 * Mutations는 순차적 로직을, Actions에는 비순차적 로직 또는 비동기 처리 로직을 선언
 * 왜? 이렇게 나눌까? `==> 설명을 봤는데 필요성은 알겠으나 완전히 이해가 안가네..두 개가 어떻게 내부적을 돌아가는지를 좀 더 봐야할듯.?! 아니 알 것 같기도... action에서 비동기 처리후 mutation을 호출하여 해당시점에 동기처리. 이렇게~`
 * 어쨌든 actions가 비동기적인 로직을 처리 후, mutation으로 store를 set할 수 밖에 없다능.. context로 접근해서 commit한다.
+* dispatch -> [Actions] -> commit -> [Mutations] -> change -> [state]
 ```javascript
+// App.vue
+<button @click="asyncIncrement({ by: 50, duration: 500 })">Increment</button>
+
+import {mapActions} from 'vuex';
+
+methods: {
+  // Mutations 를 이용할 때
+  addCounter() {
+    this.$store.commit('addCounter');
+  }
+  // Actions 를 이용할 때
+  addCounter() {
+    this.$store.dispatch('addCounter');
+  },
+  ...mapActions([ 'asyncIncreament' ])
+},
+
 // store.js
 export const store = new Vuex.Store({
   // ...
@@ -185,10 +205,22 @@ export const store = new Vuex.Store({
       return setTimeout(function () {
         context.commit('addCounter');
       }, 1000);
+    },
+    asyncIncrement: function (context, payload) {
+      return setTimeout(function () {
+        context.commit('increment', payload.by); // 매개변수 넘겨받기 가능
+      }, payload.duration);
     }
   }
 });
 ```
+
+### 파일구성
+- store
+ - actions.js
+ - mutations.js
+ - store.js
+
 
 ## 참고 자료
 * https://joshua1988.github.io/web-development/vuejs/vuex-start/
