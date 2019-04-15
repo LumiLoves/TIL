@@ -142,7 +142,7 @@ Cache-Control HTTP Header
 
 ----
 모질라. 
-개발자문서 보면서 오타 수정 많이 해서 뿌듯..
+개발자문서 보면서 오타 수정 많이 해서 뿌듯.. / 모질라 캐시문서 볼 때마다 오타를 캐냄.. 오타 엄청 많넹. 기여고고
 
 #
 캐시
@@ -179,7 +179,7 @@ Cache-Control HTTP Header
 
 #
 캐싱 제어 : Cache-control 헤더와 Pragma 헤더
-* Cache-control : ${값}
+* Cache-control : ${값} (HTTP/1.1헤더)
   * no-store
     * 캐시 스토리지 전혀 없음
     * 캐시는 클라이언트 요청 혹은 서버 응답에 관해서 어떤 것도 저장해서는 안됨. 전체 응답은 매번 항상 다운로드됨
@@ -193,10 +193,31 @@ Cache-Control HTTP Header
     * Expires와는 다르게, 이 디렉티브는 요청시간과 관련이 있음 ==> ?? 무슨말일까. 더찾아보기
   * must-revalidate
     * 캐시 사용전 유효한지 항상 체크
+* Pragma (HTTP/1.0헤더)
+  * Cache-Control는 HTTP/1.1이고, HTTP/1.0 클라이언트와의 하위호환성을 위한 경우에만 사용함
+  
+#
+유효성 체크
+* 캐시가 유효한지 확인하기 위해서 `If-None-Match`와 함께 요청으 전송. 유효하다면 서버는 요청된 리소스 본문을 전송하지 않고 304(수정되지않음) 헤더를 돌려보내, 대역폭을 절약함
+* 클라이언트 - 캐시 - 서버
+* 클라이언트가 요청을 보내면, 서버로 가기 전 캐시가 먼저 캐싱된 리소스 체크
+![절차](https://mdn.mozillademos.org/files/13771/HTTPStaleness.png)
+* 유효수명 계산
+  1. "Cache-control: max-age=N" => 유효수명 = N
+  2. 위 해더가 없다면? Expires 헤더 체크 => Expires헤더값 - Date 헤더값을 뺀 결과
+  3. 위 헤더도 없다면? Last-Modified 헤더 체크 => (Date 헤더값 - Last-Modified헤더값) / 10
+* 만료시간
+  * `expirationTime = responseTime(브라우저가 수신한 시간) + freshnessLifetime - currentAge`
 
 
-
-
+#
+활성화된(Revved) 리소스
+* 캐시된 리소스를 사용하면 할수록 웹사이트의 응답성과 성능은 점점 더 좋아질 것. 
+* 이것을 최적화 하기 위한 실제방법은 만료시간을 가능한 더 먼 미래로 설정하는 것.
+* 이것은 리소스를 자주 갱신함으로써 가능하지만, 아주 드물 업데이트되는 리소스의 경우에는 문제가 됨.
+* 이런 리소스들은 캐시한 리소스로부터 최대한 활용되는 리소스들 / 캐시를 사용하다가도 원할때 빠르게 변경되야 함.
+* 이런 것을 해결하기 위해 웹개발자들이 Revving이라는 기술을 발명!
+![Revved방법](https://mdn.mozillademos.org/files/13779/HTTPRevved.png)
 
 
 
